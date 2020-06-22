@@ -1,0 +1,6 @@
+[submodule "dual-readout"]
+	path = dual-readout
+	url = git@github.com:ivivarel/dual-readout.git
+[submodule "Git_IDEA_CALO_FIBER"]
+	path = Git_IDEA_CALO_FIBER
+	url = git@github.com:ivivarel/Git_IDEA_CALO_FIBER.git
