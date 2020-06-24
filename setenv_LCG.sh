@@ -1,5 +1,6 @@
 #!/bin/sh
 
+
 export DRCALO_LCGDIR=/cvmfs/sft.cern.ch/lcg/
 export DRCALO_LCGVER=LCG_96b
 export DRCALO_ARCH=x86_64-centos7
