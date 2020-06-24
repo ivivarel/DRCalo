@@ -8,6 +8,7 @@ set(HEPMC_DIR "$ENV{HEPMC_DIR}")
 set(HEPMC3_DIR "$ENV{HEPMC_DIR}")
 set(PYTHIA_DIR "$ENV{PYTHIA_DIR}")
 set(FASTJET_DIR "$ENV{FASTJET_DIR}")
+set(CMAKE_INSTALL_PREFIX "$ENV{DRCALO_ARCHCONF}")
 
 add_subdirectory(dual-readout)
 
