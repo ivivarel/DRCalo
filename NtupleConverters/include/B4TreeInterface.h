@@ -25,14 +25,14 @@ public :
    Char_t          PrimaryParticleName;
    Double_t        neutrinoleakage;
    Double_t        leakage;
-   vector<double>  *VectorSignalsR;
-   vector<double>  *VectorSignalsL;
-   vector<double>  *VectorSignalsCherR;
-   vector<double>  *VectorSignalsCherL;
-   vector<double>  *VectorL;
-   vector<double>  *VectorR;
-   vector<double>  *VectorL_loop;
-   vector<double>  *VectorR_loop;
+   std::vector<double>  *VectorSignalsR;
+   std::vector<double>  *VectorSignalsL;
+   std::vector<double>  *VectorSignalsCherR;
+   std::vector<double>  *VectorSignalsCherL;
+   std::vector<double>  *VectorL;
+   std::vector<double>  *VectorR;
+   std::vector<double>  *VectorL_loop;
+   std::vector<double>  *VectorR_loop;
 
    // List of branches
    TBranch        *b_Energyem;   //!

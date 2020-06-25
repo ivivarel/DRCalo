@@ -24,9 +24,10 @@ file(GLOB NtupleConverters_dict_cxx "G__*.cxx")
 add_library( DRCalo_NtupleConvertersLib SHARED ${NtupleConverters_h} ${NtupleConverters_cxx})
 
 target_link_libraries(DRCalo_NtupleConvertersLib ${ROOT_LIBRARIES})
-target_include_directories( DRCalo_NtupleConvertersLib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include )	  
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include )	  
 
-#add_executable( AddTruthToG4Ntuple ${CMAKE_SOURCE_DIR}/utils/UpdateG4tree.cxx )
+add_executable( B4TODRsimConverter ${CMAKE_CURRENT_SOURCE_DIR}/utils/ConvertB4ToDRsim.cxx )
+target_link_libraries( B4TODRsimConverter rootIO )
 
 install( TARGETS DRCalo_NtupleConvertersLib DESTINATION lib )
 install( FILES ${NtupleConverters_h} DESTINATION include/NtupleConverters )
