@@ -14,6 +14,8 @@ set(FASTJET_DIR "$ENV{FASTJET_DIR}")
 message( STATUS "Install path ${CMAKE_INSTALL_PREFIX}" )
 
 add_subdirectory(dual-readout)
+add_subdirectory(AnalysisTools)
+add_subdirectory(NtupleConverters)
 
 #This for the moment does not work, conflict between HepMC versions
 #add_subdirectory(Git_IDEA_CALO_FIBER/DRC4pifibers/DRC4pigeometry/Dream/B4)

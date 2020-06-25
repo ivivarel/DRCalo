@@ -25,8 +25,9 @@ message(STATUS ${AnalysisTools_cxx})
 add_library( DRCalo_AnalysisToolsLib SHARED ${AnalysisTools_h} ${AnalysisTools_cxx})
 
 target_link_libraries(DRCalo_AnalysisToolsLib ${ROOT_LIBRARIES})
-target_include_directories( DRCalo_AnalysisToolsLib PUBLIC ${CMAKE_SOURCE_DIR}/include )	  
+target_include_directories( DRCalo_AnalysisToolsLib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include )	  
 
+install(FILES ${AnalysisTools_h} DESTINATION include/AnalysisTools)
 
 
 

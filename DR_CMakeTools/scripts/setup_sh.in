@@ -1,10 +1,10 @@
 #!/bin/sh 
 
 #This variable will be set up by cmake at build time
-install_dir=@CMAKE_CURRENT_BINARY_DIR@
-export LD_LIBRATY_PATH=${install_dir}/lib:${LD_LIBRARY_PATH}
+install_dir=@CMAKE_CURRENT_BINARY_DIR@/@CMAKE_INSTALL_PREFIX@
+export LD_LIBRARY_PATH=${install_dir}/lib:${LD_LIBRARY_PATH}
 export PATH=${install_dir}/bin:${PATH}
-export PYTHONPATH=\${install_dir}/python:${PYTHONPATH}
+export PYTHONPATH=${install_dir}/python:${PYTHONPATH}
 
 
 
