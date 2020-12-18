@@ -27,7 +27,9 @@ target_link_libraries(DRCalo_NtupleConvertersLib ${ROOT_LIBRARIES})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include )	  
 
 add_executable( B4TODRsimConverter ${CMAKE_CURRENT_SOURCE_DIR}/utils/ConvertB4ToDRsim.cxx )
+add_executable( HitsEventTxtToNtup ${CMAKE_CURRENT_SOURCE_DIR}/utils/NtupHitsFromEventTxt.cxx )
 target_link_libraries( B4TODRsimConverter rootIO )
+target_link_libraries( HitsEventTxtToNtup rootIO )
 
 install( TARGETS DRCalo_NtupleConvertersLib DESTINATION lib )
 install( FILES ${NtupleConverters_h} DESTINATION include/NtupleConverters )
