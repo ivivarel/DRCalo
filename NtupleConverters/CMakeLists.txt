@@ -28,8 +28,10 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include )
 
 add_executable( B4TODRsimConverter ${CMAKE_CURRENT_SOURCE_DIR}/utils/ConvertB4ToDRsim.cxx )
 add_executable( HitsEventTxtToNtup ${CMAKE_CURRENT_SOURCE_DIR}/utils/NtupHitsFromEventTxt.cxx )
+add_executable( UpdateG4tree ${CMAKE_CURRENT_SOURCE_DIR}/utils/UpdateG4tree.cxx )
 target_link_libraries( B4TODRsimConverter rootIO )
 target_link_libraries( HitsEventTxtToNtup ${ROOT_LIBRARIES} )
+target_link_libraries( UpdateG4tree ${ROOT_LIBRARIES} )
 
 install( TARGETS DRCalo_NtupleConvertersLib DESTINATION lib )
 install( FILES ${NtupleConverters_h} DESTINATION include/NtupleConverters )
@@ -37,6 +39,7 @@ install( FILES scripts/UpdateG4Tree.sh DESTINATION scripts )
 install( FILES macros/UpdateG4tree.cxx DESTINATION macros ) 
 install( TARGETS B4TODRsimConverter DESTINATION bin )
 install( TARGETS HitsEventTxtToNtup DESTINATION bin )
+install( TARGETS UpdateG4tree DESTINATION bin )
 
 
 
