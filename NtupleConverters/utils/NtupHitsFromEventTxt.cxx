@@ -47,8 +47,6 @@ int main(int argc, char **argv)
     return -1;
   }
 
-  TFile o_file(s_ofile.c_str(),"recreate");
-  o_file.cd();
 
   TTree * t_tree = new TTree("CollectionTree","Tree with detailed simulation output information");
 
@@ -158,7 +156,10 @@ int main(int argc, char **argv)
     }    
   }
 
-  //t_tree->Write();
+  TFile o_file(s_ofile.c_str(),"recreate");
+  o_file.cd();
+
+  t_tree->Write();
 
   o_file.Close();
 

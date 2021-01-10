@@ -28,7 +28,7 @@ target_link_libraries(DRCalo_AnalysisToolsLib ${ROOT_LIBRARIES})
 target_include_directories( DRCalo_AnalysisToolsLib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include )	  
 
 install(FILES ${AnalysisTools_h} DESTINATION include/AnalysisTools)
-
+install( TARGETS DRCalo_AnalysisToolsLib DESTINATION lib )
 
 
 

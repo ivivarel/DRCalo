@@ -24,14 +24,18 @@ file(GLOB ClusterReconstruction_dict_cxx "G__*.cxx")
 
 add_library( DRCalo_ClusterReconstructionLib SHARED ${ClusterReconstruction_h} ${ClusterReconstruction_cxx})
 
-target_link_libraries(DRCalo_ClusterReconstructionLib ${ROOT_LIBRARIES} EDM4HEP::edm4hep podio::podioRootIO)
+target_link_libraries(DRCalo_ClusterReconstructionLib ${ROOT_LIBRARIES} EDM4HEP::edm4hep podio::podioRootIO DRCalo_DdAndCalibrationLib)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include )
 
 add_executable( ConvertToEDM4Hep ${CMAKE_CURRENT_SOURCE_DIR}/utils/ConvertRawOutputToEDM4Hep.cxx )
 target_link_libraries( ConvertToEDM4Hep ${ROOT_LIBRARIES} DRCalo_ClusterReconstructionLib )
 
+add_executable( TestClusterRecSteer ${CMAKE_CURRENT_SOURCE_DIR}/utils/TestClusterRecSteer.cxx )
+target_link_libraries( TestClusterRecSteer ${ROOT_LIBRARIES} DRCalo_ClusterReconstructionLib )
+
 install(FILES ${ClusterReconstruction_h} DESTINATION include/ClusterReconstruction)
 install( TARGETS ConvertToEDM4Hep DESTINATION bin )
-
+install( TARGETS TestClusterRecSteer DESTINATION bin )
+install( TARGETS DRCalo_ClusterReconstructionLib DESTINATION lib )
 
 

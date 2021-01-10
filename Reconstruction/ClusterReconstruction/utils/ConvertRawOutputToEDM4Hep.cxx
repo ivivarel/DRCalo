@@ -25,6 +25,10 @@ int main(int argc, char **argv)
   l_convert.SetOutputFileName(s_ofile);
   l_convert.SetInputSimName(s_ifilesim);
   l_convert.SetInputTruthName(s_ifiletruth);
+  if (!l_convert.OpenInputFiles()){
+    std::cerr << "Cannot open input files, quitting" << std::endl;
+    return -1;
+  }
   l_convert.SetDebug();
 
   bool success = l_convert.Convert();
