@@ -17,14 +17,13 @@ DR_GeometryHelper::DR_GeometryHelper():
   
 }
 
-float DR_GeometryHelper::GetCalibrationConstant(TVector3 direction, DRCalo_fiberType fiber)
+float DR_GeometryHelper::GetCalibrationConstant(TVector3& direction, DRCalo_FiberType fiber)
 {
   // First define the angle with respect to 90 degrees, then divide by m_deltaTheta
   int index = TMath::Abs(direction.Theta()*TMath::RadToDeg() - 90)/m_deltaTheta;
-  std::cout << "index = " << index << std::endl;
   float retval = 0;
-  if (fiber == DRCalo_fiberType::S) retval = m_scint_constCalib[index];
-  else if (fiber == DRCalo_fiberType::C) retval = m_cher_constCalib[index];
+  if (fiber == DRCalo_FiberType::S) retval = m_scint_constCalib[index];
+  else if (fiber == DRCalo_FiberType::C) retval = m_cher_constCalib[index];
   else {
     std::cerr << "WTF??????" << std::endl;
   }

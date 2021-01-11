@@ -6,7 +6,7 @@
 
 #include <vector>
 
-enum DRCalo_fiberType {S,C};
+#include "DRCalo_FiberType.h"
 
 class DR_GeometryHelper
 {
@@ -24,7 +24,7 @@ class DR_GeometryHelper
   unsigned int GetNbOfPhiSlices() {return m_NZrot;}
   std::vector<double> calibcher(std::vector<double> vectorcher);
   std::vector<double> calibscin(std::vector<double> vectorscin);
-  float GetCalibrationConstant(TVector3 direction, DRCalo_fiberType fiber);
+  float GetCalibrationConstant(TVector3& direction, DRCalo_FiberType fiber);
   void PrintGeometry();
   void PrintCalibration();
  private:
