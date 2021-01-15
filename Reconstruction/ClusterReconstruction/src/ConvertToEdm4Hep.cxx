@@ -196,7 +196,7 @@ bool ConvertToEdm4Hep::Convert()
     m_inputSimTree->GetEntry(i_evt);
 
     unsigned int nhits = S_x->size();
-    
+    std::cout << "Entry " << i_evt << " sci fibers " << nhits << std::endl;
     for (unsigned int i_hit = 0; i_hit < nhits; ++i_hit){
 
       // Now deal with the simulation hits

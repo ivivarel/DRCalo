@@ -5,13 +5,26 @@
 #include "edm4hep/SimCalorimeterHitCollection.h"
 #include "edm4hep/CalorimeterHitCollection.h"
 
+#include "podio/ROOTWriter.h"
+
 #include <iostream>
 
 bool ClusterRecSteer::Process()
 {
+  
+  podio::EventStore l_store;                                                                                 
+  podio::ROOTWriter l_writer("output.root",&l_store);
 
   unsigned int nevents = m_reader.getEntries();
 
+  //    edm4hep::CalorimeterHitCollection s_recoCaloHits;
+
+    auto& s_recoCaloHits = l_store.create<edm4hep::CalorimeterHitCollection>(m_outputScintHitsName );             
+  l_writer.registerForWrite(m_outputScintHitsName);
+
+      auto& c_recoCaloHits = l_store.create<edm4hep::CalorimeterHitCollection>(m_outputCherHitsName );             
+  l_writer.registerForWrite(m_outputCherHitsName );
+  
   // main loop over events
 
   for (unsigned int i_evt = 0; i_evt < nevents; ++i_evt){
@@ -37,45 +50,52 @@ bool ClusterRecSteer::Process()
       std::cout << "Number of c fibers fired " << c_hitColl.size() << std::endl;
     }
 
-    // Now create the CalorimeterHits. This should actually be a digitisation step at some point, but for the moment it is dummy
 
+    // Now create the CalorimeterHitCollection and pass them to a (dummy) digitization step that will fill them.
  
     std::cout << "Energy of the first hit = " << s_hitColl[0].getEnergy() << std::endl;
 
-    auto& caloHits = m_store.create<edm4hep::CalorimeterHitCollection>("s_recoCaloHits");
-    auto caloHit = caloHits.create();
-    caloHit.setEnergy(1000);
-
-    /*    m_calibrator.SetStore(&m_store);
-    m_calibrator.SetCaloHitCollectionName("s_recoCaloHits");
-    m_calibrator.Calibrate(s_hitColl,DRCalo_FiberType::S);
-    // Now retrieve the calibrated collection
-    */
-
-    auto& caloHitCollection = m_store.get<edm4hep::CalorimeterHitCollection>("s_recoCaloHits");
- 
-    if (caloHitCollection.isValid()){
-      std::cout << "After calibration = " << caloHitCollection[0].getEnergy() << std::endl;
-    } else {
-      std::cout << "WTF????" << std::endl;
+    if (!m_digitizer.Digitize(s_hitColl,s_recoCaloHits)){
+      std::cerr << "Cannot digitize scint collection " << std::endl;
+      return false;
     }
-    
-    // Calibrate the hits 
-    
-    /*    for (auto s_hit : s_hitColl){
-      std::cout << s_hit.getEnergy() << std::endl;
-      }*/
+    if (!m_digitizer.Digitize(c_hitColl,c_recoCaloHits)){
+      std::cerr << "Cannot digitize cher collection " << std::endl;
+      return false;
+    }      
+
+    std::cout << "Size of output collection " << s_recoCaloHits.size() << std::endl;
+    std::cout << "After digitization = " << s_recoCaloHits[0].getEnergy() << std::endl;
+
+    // now calibrate the collections
+
+    if (!m_digitizer.Calibrate(s_recoCaloHits,DRCalo_FiberType::S)){
+      std::cerr << "Cannot calibrate scint collection " << std::endl;
+      return false;
+    }
+    if (!m_digitizer.Calibrate(c_recoCaloHits,DRCalo_FiberType::C)){
+      std::cerr << "Cannot calibrate cher collection " << std::endl;
+      return false;
+    }
+
+    std::cout << "After calibration = " << s_recoCaloHits[0].getEnergy() << std::endl;
+
+    // Final cleanup
+
+    l_writer.writeEvent();
     m_read_store.clear();
-    m_store.clear();
     m_reader.endOfEvent();
+    l_store.clearCollections();
   }
-  
+  l_writer.finish();
   return true;
 }
 
 ClusterRecSteer::ClusterRecSteer():
   m_inputCherHitsName("C_SimCalorimeterHits"),
   m_inputScintHitsName("S_SimCalorimeterHits"),
+  m_outputCherHitsName("C_CalorimeterHits"),
+  m_outputScintHitsName("S_CalorimeterHits"),
   m_debug(false)
 {
 }
