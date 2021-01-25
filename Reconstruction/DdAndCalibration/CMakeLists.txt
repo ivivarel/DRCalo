@@ -15,12 +15,16 @@ target_link_libraries(DRCalo_DdAndCalibrationLib ${ROOT_LIBRARIES})
 target_include_directories(DRCalo_DdAndCalibrationLib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include )
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include )
 
-add_executable( TestDdAndCalibration ${CMAKE_CURRENT_SOURCE_DIR}/utils/TestCalibration.cxx )                                                             
-target_link_libraries( TestDdAndCalibration DRCalo_DdAndCalibrationLib ) 
+add_executable( TestDdAndCalibration ${CMAKE_CURRENT_SOURCE_DIR}/utils/TestCalibration.cxx )
+add_executable( TestGridHelper ${CMAKE_CURRENT_SOURCE_DIR}/utils/TestGridHelper.cxx )                                                             
+target_link_libraries( TestDdAndCalibration DRCalo_DdAndCalibrationLib )
+target_link_libraries( TestGridHelper DRCalo_DdAndCalibrationLib ) 
 
-install( TARGETS TestDdAndCalibration DESTINATION bin )      
+install( TARGETS TestDdAndCalibration DESTINATION bin )
+install( TARGETS TestGridHelper DESTINATION bin )      
 install(FILES ${DdAndCalibration_h} DESTINATION include/DdAndCalibration)
 install( TARGETS DRCalo_DdAndCalibrationLib DESTINATION lib )
+
 
 
 
