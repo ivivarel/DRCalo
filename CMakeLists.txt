@@ -19,6 +19,7 @@ add_subdirectory(NtupleConverters)
 add_subdirectory(Reconstruction/ClusterReconstruction)
 add_subdirectory(Reconstruction/DdAndCalibration)
 add_subdirectory(Digitization/SimSiPM)
+add_subdirectory(Digitization/DRDigitization)
 
 ### create the setup file
 

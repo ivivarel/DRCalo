@@ -9,8 +9,6 @@
 #include "podio/EventStore.h"
 #include "podio/ROOTReader.h"
 
-#include "FiberDigitizer.h"
-
 class ClusterRecSteer
 {
  public:
@@ -33,7 +31,6 @@ class ClusterRecSteer
   bool m_debug;
   podio::ROOTReader m_reader;
   podio::EventStore m_read_store;
-  FiberDigitizer m_digitizer;
 };
 
 #endif

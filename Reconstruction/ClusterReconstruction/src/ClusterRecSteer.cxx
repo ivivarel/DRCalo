@@ -55,21 +55,21 @@ bool ClusterRecSteer::Process()
  
     std::cout << "Energy of the first hit = " << s_hitColl[0].getEnergy() << std::endl;
 
-    if (!m_digitizer.Digitize(s_hitColl,s_recoCaloHits)){
+    /*    if (!m_digitizer.Digitize(s_hitColl,s_recoCaloHits)){
       std::cerr << "Cannot digitize scint collection " << std::endl;
       return false;
     }
     if (!m_digitizer.Digitize(c_hitColl,c_recoCaloHits)){
       std::cerr << "Cannot digitize cher collection " << std::endl;
       return false;
-    }      
+      }      
 
     std::cout << "Size of output collection " << s_recoCaloHits.size() << std::endl;
     std::cout << "After digitization = " << s_recoCaloHits[0].getEnergy() << std::endl;
 
     // now calibrate the collections
 
-    if (!m_digitizer.Calibrate(s_recoCaloHits,DRCalo_FiberType::S)){
+        if (!m_digitizer.Calibrate(s_recoCaloHits,DRCalo_FiberType::S)){
       std::cerr << "Cannot calibrate scint collection " << std::endl;
       return false;
     }
@@ -79,7 +79,8 @@ bool ClusterRecSteer::Process()
     }
 
     std::cout << "After calibration = " << s_recoCaloHits[0].getEnergy() << std::endl;
-
+    */
+    
     // Final cleanup
 
     l_writer.writeEvent();
