@@ -33,9 +33,16 @@ target_link_libraries( ConvertToEDM4Hep ${ROOT_LIBRARIES} DRCalo_ClusterReconstr
 add_executable( TestClusterRecSteer ${CMAKE_CURRENT_SOURCE_DIR}/utils/TestClusterRecSteer.cxx )
 target_link_libraries( TestClusterRecSteer ${ROOT_LIBRARIES} DRCalo_ClusterReconstructionLib )
 
+add_executable( TestPodio ${CMAKE_CURRENT_SOURCE_DIR}/utils/test_podio.cxx )
+target_link_libraries( TestPodio ${ROOT_LIBRARIES} DRCalo_ClusterReconstructionLib EDM4HEP::edm4hep podio::podioRootIO )
+add_executable( TestReadPodio ${CMAKE_CURRENT_SOURCE_DIR}/utils/test_readpodio.cxx )
+target_link_libraries( TestReadPodio ${ROOT_LIBRARIES} DRCalo_ClusterReconstructionLib EDM4HEP::edm4hep podio::podioRootIO )
+
 install(FILES ${ClusterReconstruction_h} DESTINATION include/ClusterReconstruction)
 install( TARGETS ConvertToEDM4Hep DESTINATION bin )
 install( TARGETS TestClusterRecSteer DESTINATION bin )
+install( TARGETS TestPodio DESTINATION bin )
+install( TARGETS TestReadPodio DESTINATION bin ) 
 install( TARGETS DRCalo_ClusterReconstructionLib DESTINATION lib )
 
 
