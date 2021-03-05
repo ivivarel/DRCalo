@@ -2,3 +2,6 @@
 	path = Git_IDEA_CALO_FIBER
 	url = git@github.com:ivivarel/Git_IDEA_CALO_FIBER.git
 
+[submodule "Digitization/SimSiPM"]
+	path = Digitization/SimSiPM
+	url = git@github.com:EdoPro98/SimSiPM.git
