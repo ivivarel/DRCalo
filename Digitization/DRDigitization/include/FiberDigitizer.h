@@ -7,6 +7,7 @@
 #include "DRCalo_FiberType.h"
 #include "DR_GeometryHelper.h"
 
+#include "SiPMAnalogSignal.h"
 #include "SiPMProperties.h"
 #include "SiPMSensor.h"
 
@@ -19,11 +20,11 @@ public:
   FiberDigitizer();
   ~FiberDigitizer();
   
-  bool Digitize(const edm4hep::SimCalorimeterHitCollection& i_coll, edm4hep::CalorimeterHitCollection& o_coll);
+  void Digitize(const edm4hep::SimCalorimeterHitCollection& i_coll, edm4hep::CalorimeterHitCollection& o_coll);
   bool Calibrate(edm4hep::CalorimeterHitCollection& l_coll, DRCalo_FiberType l_type);
   void SetDebug(bool debug = true){m_debug = debug;}
-  void SetSensor(sipm::SiPMSensor * l_sensor){m_sensor = l_sensor;}
   sipm::SiPMSensor * GetSensor() {return m_sensor;}
+  void SetSiPMSensor(sipm::SiPMSensor * l_sensor) {m_sensor = l_sensor;}
   
 private:
   bool m_debug;

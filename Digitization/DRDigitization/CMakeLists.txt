@@ -12,6 +12,7 @@ list(APPEND CMAKE_PREFIX_PATH $ENV{ROOTSYS})
 #---Locate the ROOT package and defines a number of variables (e.g. ROOT_INCLUDE_DIRS)
 find_package(ROOT REQUIRED)
 find_package(EDM4HEP)
+find_package(podio)
 
 
 #---Define useful ROOT functions and macros (e.g. ROOT_GENERATE_DICTIONARY)
@@ -23,10 +24,13 @@ file(GLOB DRDigitization_dict_cxx "G__*.cxx")
 
 add_library( DRCalo_DRDigitizationLib SHARED ${DRDigitization_h} ${DRDigitization_cxx})
 
-target_link_libraries(DRCalo_DRDigitizationLib ${ROOT_LIBRARIES} EDM4HEP::edm4hep DRCalo_DdAndCalibrationLib sipm)
+target_link_libraries(DRCalo_DRDigitizationLib ${ROOT_LIBRARIES} EDM4HEP::edm4hep podio::podioRootIO DRCalo_DdAndCalibrationLib sipm)
 target_include_directories(DRCalo_DRDigitizationLib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include )
+
+add_executable( RunDRDigitization ${CMAKE_CURRENT_SOURCE_DIR}/utils/RunDRDigitization.cxx )
+target_link_libraries( RunDRDigitization ${ROOT_LIBRARIES} DRCalo_DRDigitizationLib sipm)
 
 install(FILES ${DRDigitization_h} DESTINATION include/DRDigitization)
 install( TARGETS DRCalo_DRDigitizationLib DESTINATION lib )
-
+install( TARGETS RunDRDigitization DESTINATION bin )
 

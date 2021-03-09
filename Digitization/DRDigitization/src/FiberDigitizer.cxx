@@ -8,9 +8,10 @@ FiberDigitizer::FiberDigitizer():
 {}
 
 FiberDigitizer::~FiberDigitizer()
-{}
+{
+}
 
-bool FiberDigitizer::Digitize(const edm4hep::SimCalorimeterHitCollection& i_coll, edm4hep::CalorimeterHitCollection& o_coll)
+void FiberDigitizer::Digitize(const edm4hep::SimCalorimeterHitCollection& i_coll, edm4hep::CalorimeterHitCollection& o_coll)
 {
 
   std::vector<double> fiber_times;
@@ -19,10 +20,15 @@ bool FiberDigitizer::Digitize(const edm4hep::SimCalorimeterHitCollection& i_coll
   
   for (auto& sim_hit : i_coll){
     fiber_times.clear();
+
+    // Create the corresponding hit in the output collection
+    
     auto o_coll_elem = o_coll.create();
-    // Loop over CaloHitContributions and save the times
+    
+    // Loop over CaloHitContributions and save the hit times
+    
     for (auto itr = sim_hit.contributions_begin(); itr != sim_hit.contributions_end(); ++itr){
-      fiber_times.append(double(itr->getTime()));
+      fiber_times.push_back(double(itr->getTime()));
     }
     
     // Set basic properties of the CalorimeterHit
@@ -30,34 +36,46 @@ bool FiberDigitizer::Digitize(const edm4hep::SimCalorimeterHitCollection& i_coll
     o_coll_elem.setCellID(sim_hit.getCellID());
     o_coll_elem.setPosition(sim_hit.getPosition());
     o_coll_elem.setType(0);
+    
     if (fiber_times.size() == 0){
+      // no info about time available
       o_coll_elem.setTime(0);
     } else {	
       if (m_sensor == NULL){
+
+	static bool l_warn = true;
+	if (l_warn) {
+	  std::cout << "WARNING!!!! No sensor provided to FiberDigitizer. The digitization will be dummy!" << std::endl;
+	  l_warn = false;
+	}
+	
 	//run a dummy digitization
 	
 	o_coll_elem.setEnergy(sim_hit.getEnergy());
 	// set the time as the average of the times
-
+	
 	float l_time = 0.;
 	for (unsigned int i = 0; i < fiber_times.size(); ++i){
 	  l_time += fiber_times[i];
 	}
 	o_coll_elem.setTime(l_time/float(fiber_times.size()));
-	o_coll_elem.setEnergyError(0); 
-      } else {
-	// run a proper digitization
-	m_sensor->resetState();
-	m_sensor->addPhoton(fiber_times);
-	m_sensor->runEvent();
-
-	SiPMAnalogSignal l_signal = m_sensor.signal();
-	o_coll_elem.setEnergy(signal.integral(5,250,0.5));
-	o_coll_elem.setTime(signal.toa(5,250,0.5));
 	o_coll_elem.setEnergyError(0);
-      }
-
-  return true;
+	
+      } else {
+	
+	// run a proper digitization
+	
+	m_sensor->resetState();
+	m_sensor->addPhotons(fiber_times);
+	m_sensor->runEvent();
+	
+	sipm::SiPMAnalogSignal l_signal = m_sensor->signal();
+	o_coll_elem.setEnergy(l_signal.integral(5,250,0.5));
+	o_coll_elem.setTime(l_signal.toa(5,250,0.5));
+	o_coll_elem.setEnergyError(0);
+      } // end check whether proper digitization needed
+    } // end check whether time information available
+  } // end loop over collection
 }
 
 bool FiberDigitizer::Calibrate(edm4hep::CalorimeterHitCollection& l_coll, DRCalo_FiberType l_type)

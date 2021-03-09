@@ -11,27 +11,42 @@
 
 #include "FiberDigitizer.h"
 
-class sipm::SiPMSensor;
-
 class DigitSteer
 {
+
+  /** Class to steer the digitization of dual readout SimCaloriemeterHits collections. 
+      The class makes heavy use of a FiberDigitizer object, which needs to be configured and passed to this class for its operations. 
+      The configuration of the SiPM sensor is external to this class. 
+      DigitSteer can run a calibration step as well. 
+  **/
+  
  public:
+  
   DigitSteer();
   ~DigitSteer();
-  bool Process();
+  bool Process(); // Run digitization (and calibration, if DoCalibration == true)
+
+  // Functions to deal with file opening and closing
   bool LoadFile(std::string input_file_name);
   bool CloseFile();
+
+  // Setters for the collection names
   void SetScintInputHitsName(std::string input_hits_name) {m_inputScintHitsName=input_hits_name;}
   void SetCherInputHitsName(std::string input_hits_name) {m_inputCherHitsName=input_hits_name;}
   void SetAuxInputHitsName(std::string input_hits_name) {m_inputScintHitsName=input_hits_name;}
   void SetScintOutputHitsName(std::string hits_name) {m_outputScintHitsName=hits_name;}
   void SetCherOutputHitsName(std::string hits_name) {m_outputCherHitsName=hits_name;}
   void SetAuxOutputHitsName(std::string hits_name) {m_outputCherHitsName=hits_name;}
+
+  // Setter for the output file
   void SetOutputFileName(std::string filename) {m_outputFileName = filename;}
+
+  void SetFiberDigitizer(FiberDigitizer * l_digitizer){m_digitizer = l_digitizer;}
+  const FiberDigitizer * GetFiberDigitizer() {return m_digitizer;}
+
+  // A few flags
   void SetDebug(bool debug = true) {m_debug = debug;}
   void DoCalibration(bool doCal = true) {m_doCalibration = doCal;}
-  void SetSiPMSensor(sipm::SiPMSensor * l_sensor = NULL);
-  
   
  private:
   std::string m_inputCherHitsName;
@@ -45,8 +60,7 @@ class DigitSteer
   bool m_doCalibration;
   podio::ROOTReader m_reader;
   podio::EventStore m_read_store;
-  FiberDigitizer m_digitizer;
-  sipm::SiPMSensor m_sensor;
+  FiberDigitizer * m_digitizer;
 };
 
 #endif

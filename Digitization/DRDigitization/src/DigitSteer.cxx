@@ -11,6 +11,11 @@
 
 bool DigitSteer::Process()
 {
+
+  if (m_digitizer == NULL) {
+    std::cerr << "ERROR in DigitSteer::Process : the pointer to the FiberDigitizer is NULL.  Cannot process the input file for digitization. Please set it to something valid using the SigitSteer::SetFiberDigitizer methood" << std::endl;
+    return false;
+  }
   
   podio::EventStore l_store;                                                                                 
   podio::ROOTWriter l_writer(m_outputFileName,&l_store);
@@ -27,13 +32,15 @@ bool DigitSteer::Process()
 
   // check that the digitiser has a sensor set.
 
-  if (m_digitizer.GetSensor() == NULL){
+  if (m_digitizer->GetSensor() == NULL){
     std::cout << "WARNING!!!!!!! No sensor has been set for the digitizer. The digitisation step will be dummy" << std::endl;
   }
   
   // main loop over events
 
   for (unsigned int i_evt = 0; i_evt < nevents; ++i_evt){
+
+    if (i_evt%100 == 0) std::cout << "Processed " << i_evt << " events" << std::endl;
 
     // retrieve the simulation hits
     
@@ -46,10 +53,7 @@ bool DigitSteer::Process()
 
     if (m_debug) std::cout << "Number of s fibers fired " << s_hitColl.size() << std::endl;
 
-    if (!m_digitizer.Digitize(s_hitColl,s_recoCaloHits)){
-      std::cerr << "Cannot digitize scint collection " << std::endl;
-      return false;
-    }
+    m_digitizer->Digitize(s_hitColl,s_recoCaloHits);    
 
     auto & c_hitColl = m_read_store.get<edm4hep::SimCalorimeterHitCollection>(m_inputCherHitsName);
 
@@ -58,22 +62,19 @@ bool DigitSteer::Process()
       return false;
     }
 
-    if (m_debug) std::cout << "Number of s fibers fired " << c_hitColl.size() << std::endl;
+    if (m_debug) std::cout << "Number of c fibers fired " << c_hitColl.size() << std::endl;
 
-    if (!m_digitizer.Digitize(c_hitColl,c_recoCaloHits)){
-      std::cerr << "Cannot digitize cher collection " << std::endl;
-      return false;
-    }      
+    m_digitizer->Digitize(c_hitColl,c_recoCaloHits);
 
     // now calibrate the collections
 
     if (m_doCalibration){
 
-      if (!m_digitizer.Calibrate(s_recoCaloHits,DRCalo_FiberType::S)){
+      if (!m_digitizer->Calibrate(s_recoCaloHits,DRCalo_FiberType::S)){
 	std::cerr << "Cannot calibrate scint collection " << std::endl;
 	return false;
       }
-      if (!m_digitizer.Calibrate(c_recoCaloHits,DRCalo_FiberType::C)){
+      if (!m_digitizer->Calibrate(c_recoCaloHits,DRCalo_FiberType::C)){
 	std::cerr << "Cannot calibrate cher collection " << std::endl;
 	return false;
       }
@@ -90,20 +91,9 @@ bool DigitSteer::Process()
   return true;
 }
 
-void DigitSteer::SetSiPMSensor(sipm::SiPMSensor * l_sensor = NULL)
-{
-  if (l_sensor == NULL){
-    // no sensor passed. We create it, but we also set m_sensor to later delete it
-    l_sensor = new sipm::SiPMSensor();
-    m_sensor = l_sensor;
-  } else {
-    m_digitizer.SetSensor(l_sensor);
-  }
-}
-
 DigitSteer::DigitSteer():
-  m_inputCherHitsName("C_SimCalorimeterHits"),
-  m_inputScintHitsName("S_SimCalorimeterHits"),
+  m_inputCherHitsName("C_caloHits"),
+  m_inputScintHitsName("S_caloHits"),
   m_inputAuxHitsName("Auxiliary_infoHits"),
   m_outputCherHitsName("C_CalorimeterHits"),
   m_outputScintHitsName("S_CalorimeterHits"),
@@ -111,7 +101,7 @@ DigitSteer::DigitSteer():
   m_outputFileName("digi_output.podio.root"),
   m_debug(false),
   m_doCalibration(false),
-  m_sensor(NULL)    
+  m_digitizer(NULL)
 {
 }
 
