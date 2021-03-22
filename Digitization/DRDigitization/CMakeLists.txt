@@ -10,19 +10,26 @@ project( DRCalo_DRDigitization )
 list(APPEND CMAKE_PREFIX_PATH $ENV{ROOTSYS})
 
 #---Locate the ROOT package and defines a number of variables (e.g. ROOT_INCLUDE_DIRS)
-find_package(ROOT REQUIRED)
+find_package(ROOT REQUIRED COMPONENTS RIO Net)
 find_package(EDM4HEP)
 find_package(podio)
-
 
 #---Define useful ROOT functions and macros (e.g. ROOT_GENERATE_DICTIONARY)
 include(${ROOT_USE_FILE})
 
+include_directories(ROOT_BUG)
+
+ROOT_GENERATE_DICTIONARY(G__FiberDigitizer ${CMAKE_CURRENT_SOURCE_DIR}/include/FiberDigitizer.h LINKDEF ${CMAKE_CURRENT_SOURCE_DIR}/include/FiberDigitizerLinkDef.h DEPENDENCIES DRCalo_DdAndCalibrationLib sipm)
+
+ROOT_GENERATE_DICTIONARY(G__DigitSteer ${CMAKE_CURRENT_SOURCE_DIR}/include/DigitSteer.h LINKDEF ${CMAKE_CURRENT_SOURCE_DIR}/include/DigitSteerLinkDef.h DEPENDENCIES DRCalo_DdAndCalibrationLib sipm)
+
+
 file(GLOB DRDigitization_h "include/*.h")
 file(GLOB DRDigitization_cxx "src/*.cxx")
-file(GLOB DRDigitization_dict_cxx "G__*.cxx")
+#file(GLOB DRDigitization_dict_cxx "G__*.cxx")
 
-add_library( DRCalo_DRDigitizationLib SHARED ${DRDigitization_h} ${DRDigitization_cxx})
+add_library( DRCalo_DRDigitizationLib SHARED ${DRDigitization_h} ${DRDigitization_cxx} G__FiberDigitizer.cxx G__DigitSteer.cxx)
+add_dependencies(DRCalo_DRDigitizationLib DRCalo_DdAndCalibrationLib)
 
 target_link_libraries(DRCalo_DRDigitizationLib ${ROOT_LIBRARIES} EDM4HEP::edm4hep podio::podioRootIO DRCalo_DdAndCalibrationLib sipm)
 target_include_directories(DRCalo_DRDigitizationLib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include )

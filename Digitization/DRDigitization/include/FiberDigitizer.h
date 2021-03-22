@@ -19,17 +19,32 @@ class FiberDigitizer
 public: 
   FiberDigitizer();
   ~FiberDigitizer();
+
+  /* Main hooks to calibration and digitization. The digitization is performed by simulated sensors using the sipm library provided by University of Insubria. The calibration (at the moment dummy) is provided by reading calibration constants from teh DR_GeometryHelper */
   
   void Digitize(const edm4hep::SimCalorimeterHitCollection& i_coll, edm4hep::CalorimeterHitCollection& o_coll);
   bool Calibrate(edm4hep::CalorimeterHitCollection& l_coll, DRCalo_FiberType l_type);
+
+  /* Additional printouts if a debug flag is set */
+  
   void SetDebug(bool debug = true){m_debug = debug;}
-  sipm::SiPMSensor * GetSensor() {return m_sensor;}
+
+  /* Integration parameters for the sensor's signal */
+
+  void SetIntegrationParameters(unsigned int  intStart, unsigned int intGate, float threshold);
+  
+  /* The sensor is set externally, so that it can be configured before passing it to the FiberDigitizer (with the corresponding getter */
+  
   void SetSiPMSensor(sipm::SiPMSensor * l_sensor) {m_sensor = l_sensor;}
+  sipm::SiPMSensor * GetSensor() {return m_sensor;}
   
 private:
   bool m_debug;
   DR_GeometryHelper m_geomHelper;
   sipm::SiPMSensor * m_sensor;
+  unsigned int m_intStart;
+  unsigned int m_intGate;
+  float m_threshold;
   
  };
 

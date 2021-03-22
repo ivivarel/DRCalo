@@ -27,13 +27,19 @@ int main(int argc, char **argv)
 
   // Now configuring the SiPM sensor
   sipm::SiPMProperties l_properties;
+
+  // creating a default sensor. Many properties of the sensor are available
+  
   sipm::SiPMSensor l_sensor (l_properties);
 
+  // Now creating the FiberDigitizer, which acts asa hook to the sensor. A possible property of the FiberDigitizer is teh integration parameters (look at the header file)
+  
   FiberDigitizer l_digitizer;
   l_digitizer.SetSiPMSensor(&l_sensor);
   
   std::cout << "Starting process" << std::endl;
   l_steer.SetFiberDigitizer(&l_digitizer);
+  l_steer.DoCalibration(false); // The calibration it technically doable, but it needs to be done 
   l_steer.Process();
   std::cout << "Closing file and exiting" << std::endl;
   l_steer.CloseFile();
