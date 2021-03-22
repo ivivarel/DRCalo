@@ -23,10 +23,10 @@ ROOT_GENERATE_DICTIONARY(G__FiberDigitizer ${CMAKE_CURRENT_SOURCE_DIR}/include/F
 
 ROOT_GENERATE_DICTIONARY(G__DigitSteer ${CMAKE_CURRENT_SOURCE_DIR}/include/DigitSteer.h LINKDEF ${CMAKE_CURRENT_SOURCE_DIR}/include/DigitSteerLinkDef.h DEPENDENCIES DRCalo_DdAndCalibrationLib sipm)
 
-
 file(GLOB DRDigitization_h "include/*.h")
 file(GLOB DRDigitization_cxx "src/*.cxx")
-#file(GLOB DRDigitization_dict_cxx "G__*.cxx")
+
+
 
 add_library( DRCalo_DRDigitizationLib SHARED ${DRDigitization_h} ${DRDigitization_cxx} G__FiberDigitizer.cxx G__DigitSteer.cxx)
 add_dependencies(DRCalo_DRDigitizationLib DRCalo_DdAndCalibrationLib)
@@ -38,6 +38,13 @@ add_executable( RunDRDigitization ${CMAKE_CURRENT_SOURCE_DIR}/utils/RunDRDigitiz
 target_link_libraries( RunDRDigitization ${ROOT_LIBRARIES} DRCalo_DRDigitizationLib sipm)
 
 install(FILES ${DRDigitization_h} DESTINATION include/DRDigitization)
+install(FILES python/run_digitization.py DESTINATION python)
+install(FILES python/test_digitization.py DESTINATION python)
 install( TARGETS DRCalo_DRDigitizationLib DESTINATION lib )
+install(FILES ${CMAKE_BINARY_DIR}/Digitization/DRDigitization/libDigitSteer.rootmap DESTINATION lib )
+install(FILES ${CMAKE_BINARY_DIR}/Digitization/DRDigitization/libDigitSteer_rdict.pcm DESTINATION lib )
+install(FILES ${CMAKE_BINARY_DIR}/Digitization/DRDigitization/libFiberDigitizer.rootmap DESTINATION lib )
+install(FILES ${CMAKE_BINARY_DIR}/Digitization/DRDigitization/libFiberDigitizer_rdict.pcm DESTINATION lib )
+install( TARGETS DRCalo_DRDigitizationLib LIBRARY DESTINATION lib )
 install( TARGETS RunDRDigitization DESTINATION bin )
 
