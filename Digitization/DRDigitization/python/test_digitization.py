@@ -9,9 +9,10 @@ def main():
     parser = argparse.ArgumentParser(description='This script does some validation plotting. One can simply pass teh input digit file and get some histograms. If one also passes the hits file, one gets direct comparisons of the two estimates of quantities')
 
     parser.add_argument('--input', dest='ifile',help='Input file name. Leave empty to run with no input file (for example to debug sensor properties)')
-    parser.add_argument('--output',dest='ofile',help='Output file name',default='output_digit.podio.root')
+    parser.add_argument('--outputROOT',dest='ofile',help='Output file name',default='output_digit.podio.root')
     parser.add_argument('--inputHits',dest='hitfile',help='Optiona input hits file')
     parser.add_argument('--debug',action='store_true',dest='debug',default=False, help='Print more debugging information')
+    parser.add_argument('--outputPdf',dest='outPDF',default='validation_output.pdf',help='Name of teh output pdf file')
     
     par  = parser.parse_args()
 
@@ -26,26 +27,55 @@ def main():
     ofile.mkdir("Digitization")
     
     ofile.cd("Digitization")
+
+    h_list = []
     
     h_c_fiber_energy = ROOT.TH1F("h_c_fiber_energy","",100,0,-1)
+    h_c_fiber_energy.SetXTitle("Individual C fibre energy (arbitrary units)")
+    h_list.append(h_c_fiber_energy)
     h_s_fiber_energy = ROOT.TH1F("h_s_fiber_energy","",100,0,-1)
+    h_s_fiber_energy.SetXTitle("Individual S fibre energy (arbitrary units)")
+    h_list.append(h_s_fiber_energy)
     h_c_fiber_time = ROOT.TH1F("h_c_fiber_time","",100,0,-1)
+    h_c_fiber_time.SetXTitle("Individual C fibre time [ns]")
+    h_list.append(h_c_fiber_time)    
     h_s_fiber_time = ROOT.TH1F("h_s_fiber_time","",100,0,-1)
-    
+    h_s_fiber_time.SetXTitle("Individual S fibre time [ns]")
+    h_list.append(h_s_fiber_time)
+        
     h_c_energy = ROOT.TH1F("h_c_energy","",100,0,-1)
+    h_c_energy.SetXTitle("Total C Energy (a.u.)")
+    h_list.append(h_c_energy)    
     h_s_energy = ROOT.TH1F("h_s_energy","",100,0,-1)
+    h_s_energy.SetXTitle("Total S Energy (a.u.)")
+    h_list.append(h_s_energy)    
     h_c_time = ROOT.TH1F("h_c_time","",100,0,-1)
+    h_c_time.SetXTitle("Average C time [ns]")
+    h_list.append(h_c_time)    
     h_s_time = ROOT.TH1F("h_s_time","",100,0,-1)
+    h_s_time.SetXTitle("Average C time [ns]")
+    h_list.append(h_s_time)    
     
     h_n_s_fiber = ROOT.TH1F("h_n_s_fiber","",100,0,-1)
+    h_n_s_fiber.SetXTitle("S fibre multiplicity")
+    h_list.append(h_n_s_fiber)    
     h_n_c_fiber = ROOT.TH1F("h_n_c_fiber","",100,0,-1)
+    h_n_c_fiber.SetXTitle("C fibre multiplicity")
+    h_list.append(h_n_c_fiber)
+
+        
+    c = ROOT.TCanvas()
 
     if hitfilename != None:
         storehit = EventStore(hitfilename)
         ofile.mkdir("DigiVsHits")
         ofile.cd("DigiVsHits")
         h_c_ratio_simdigi = ROOT.TH1F("h_c_ratio_simdigi","",100,0,-1)
+        h_c_ratio_simdigi.SetXTitle("Hit energy/Digi energy")
+        h_list.append(h_c_ratio_simdigi)    
         h_s_ratio_simdigi = ROOT.TH1F("h_s_ratio_simdigi","",100,0,-1)
+        h_s_ratio_simdigi.SetXTitle("Hit energy/Digi energy")
+        h_list.append(h_s_ratio_simdigi)    
     
     for i, event in enumerate(store):
         if i % 1000 == 0:
@@ -104,7 +134,13 @@ def main():
                 h_c_ratio_simdigi.Fill(tot_c_hitenergy/tot_c_energy)
             if (tot_s_energy != 0):
                 h_s_ratio_simdigi.Fill(tot_s_hitenergy/tot_s_energy)
-    
+
+    c.Print(par.outPDF+'[')
+    for h in h_list:
+        c.Clear()
+        h.Draw()
+        c.Print(par.outPDF)
+    c.Print(par.outPDF+']')
     
 
     ofile.Write()
