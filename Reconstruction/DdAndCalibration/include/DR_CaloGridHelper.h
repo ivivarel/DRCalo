@@ -1,7 +1,17 @@
 #ifndef DR_CALOGRIDHELPER_H
 #define DR_CALOGRIDHELPER_H
 
+#include "edm4hep/ClusterCollection.h"
+#include "edm4hep/CalorimeterHit.h"
+
+#include <TString.h>
+#include <TH2F.h>
+
 #include <map>
+#include <memory>
+
+typedef   std::map<unsigned long long, double > DR_CaloGrid;
+typedef unsigned long long DR_GridID;
 
 class DR_CaloGridHelper
 {
@@ -14,23 +24,30 @@ class DR_CaloGridHelper
   DR_CaloGridHelper(double distPar = 5.);
   ~DR_CaloGridHelper() {};
 
-  double GetCosTheta(unsigned long long id);
-  double GetTheta(unsigned long long id);
-  double GetPhi(unsigned long long id);
-  unsigned long long GetID(float theta, float phi);
-  double GetEnergy(unsigned long long id);
+  double GetCosTheta(DR_GridID id);
+  double GetTheta(DR_GridID id);
+  double GetPhi(DR_GridID id);
+  DR_GridID GetID(float theta, float phi);
+  double GetEnergy(DR_GridID id);
   double GetEnergy(float theta, float phi);
   void SetDistanceParameter(double dp) {m_rm = dp;};
   void CreateGrid();
   double GetDelta() {return m_delta;}
   void Add(float theta, float phi, float energy);
+  void Add(const edm4hep::CalorimeterHit & caloHit); 
+  void Reset();
+  DR_CaloGrid &  GetGrid() {return m_caloGrid;}
+  void EventDisplay(TString filename);
+  void Print();
+ 
   
  private:
-  std::map<unsigned long long, double> m_caloGrid;
+  DR_CaloGrid m_caloGrid;
   double m_rm; // Distance parameter that generates the grid
   double m_caloEffDist; // Effective distance of the calorimeter (assumed to be spherical). This parameter is hard coded (no accessor for it).
   double m_delta;
-  unsigned int m_spacing;
+  unsigned int m_spacing; // Parameter used to encode eta and phi in the ID
+  void CreateEntry(DR_GridID gridID);
 };
 
 #endif // ifndef DR_CALOGRIDHELPER_H   

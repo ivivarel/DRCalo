@@ -1,6 +1,8 @@
 #include "DR_CaloGridHelper.h"
 
 #include <TMath.h>
+#include <TVector3.h>
+#include <TCanvas.h>
 
 #include <iostream>
 
@@ -15,11 +17,16 @@ void DR_CaloGridHelper::CreateGrid()
   std::cout << m_delta << std::endl;
 }
 
-unsigned long long DR_CaloGridHelper::GetID(float theta, float phi)
+DR_GridID DR_CaloGridHelper::GetID(float theta, float phi) // Theta and Phi both in rads 
 {
   // Make sure that theta and phi are defined between 0 and pi and 0-2pi
-
-  if (phi < 0) phi = phi + 2*TMath::Pi();
+  while (phi > 2*TMath::Pi()){
+    phi = phi - 2*TMath::Pi();
+  }
+  while (phi < 0) {
+    phi = phi + 2*TMath::Pi();
+  }
+  
   if (theta < 0) {
     std::cerr << "DR_CaloGridHelper::GetID: theta should be positively defined and instead it is " << theta << std::endl;
     std::cerr << "Things are going to go horribly wrong" << std::endl;
@@ -30,32 +37,32 @@ unsigned long long DR_CaloGridHelper::GetID(float theta, float phi)
     return 0;
   }
   
-  //  std::cout << "phi " << phi << " m_delta " << m_delta << " ratio " << phi/m_delta << std::endl;
-  unsigned long long   int_phi = static_cast<unsigned long long>(phi/m_delta);  
-  unsigned long long  int_costheta = static_cast<unsigned long long>((TMath::Cos(theta)+1.)/m_delta);
+  DR_GridID   int_phi = static_cast<DR_GridID>(phi/m_delta);  
+  DR_GridID  int_costheta = static_cast<DR_GridID>((TMath::Cos(theta)+1.)/m_delta);
 
-  /*std::cout << "int_phi " << int_phi << std::endl;
-    std::cout << "int_costheta " << int_costheta << std::endl;*/
-  
   return  int_phi + int_costheta*m_spacing;
 }
 
-double DR_CaloGridHelper::GetCosTheta(unsigned long long id)
+double DR_CaloGridHelper::GetCosTheta(DR_GridID id)
 {
   return static_cast<double>((id/m_spacing))*m_delta -1;
 }
 
-double DR_CaloGridHelper::GetTheta(unsigned long long id)
+double DR_CaloGridHelper::GetTheta(DR_GridID id)
 {
   return TMath::ACos(GetCosTheta(id));
 }
 
-double DR_CaloGridHelper::GetPhi(unsigned long long id)
+double DR_CaloGridHelper::GetPhi(DR_GridID id)
 {
-  return (id%m_spacing)*m_delta;
+  double retval = (id%m_spacing)*m_delta;
+  if (retval > 2*TMath::Pi() || retval < 0){
+    std::cout << "WARNING: anomalous value of " << retval << " for phi, which should be between 0 and 2Pi" << std::endl;
+  }
+  return retval;
 }
 
-double DR_CaloGridHelper::GetEnergy(unsigned long long id)
+double DR_CaloGridHelper::GetEnergy(DR_GridID id)
 {
   if (m_caloGrid.find(id) == m_caloGrid.end()) return 0;
   return m_caloGrid[id];
@@ -68,8 +75,99 @@ double DR_CaloGridHelper::GetEnergy(float theta, float phi)
 
 void DR_CaloGridHelper::Add(float theta, float phi, float energy)
 {
-  m_caloGrid[GetID(theta,phi)] = energy + GetEnergy(GetID(theta,phi)); // This now assumes that the individual elements of the grid should be massless. I believe this is the right thing to do (for example, it wouldn't make sense to sum the 4-vectors of the individual fiber, if the fibers arise from a single particle). In any case, the effect should be very small for small size of the grid elements
+  static DR_GridID id;
+  id = GetID(theta,phi);
+  if (m_caloGrid.find(id) == m_caloGrid.end()) {
+    CreateEntry(id);
+  }
+  m_caloGrid[id] = energy + GetEnergy(id); // This now assumes that the individual elements of the grid should be massless. I believe this is the right thing to do (for example, it wouldn't make sense to sum the 4-vectors of the individual fiber, if the fibers arise from a single particle). In any case, the effect should be very small for small size of the grid elements
+}
+
+void DR_CaloGridHelper::Add(const edm4hep::CalorimeterHit & caloHit)
+{
+  static TVector3 l_hit;
+  l_hit.SetXYZ(
+	       caloHit.getPosition().x,
+	       caloHit.getPosition().y,
+	       caloHit.getPosition().z
+	       );
+  
+  static DR_GridID id;
+  Add(l_hit.Theta(),l_hit.Phi(),caloHit.getEnergy());
 }
 
 
+void DR_CaloGridHelper::CreateEntry(DR_GridID gridID)
+{
+  m_caloGrid[gridID] = 0;
 
+  /*m_caloGrid[gridID] = edm4hep::ClusterCollection();
+  auto l_cluster = m_caloGrid[gridID].create();
+
+  static TVector3 l_vec;
+    // Set the position of the cluster half an m_delta away (in phi and costheta) from the bin edge 
+  l_vec.SetMagThetaPhi(
+		       m_caloEffDist,
+		       (GetTheta(gridID) + GetTheta(gridID + m_spacing))/2.,
+		       (GetPhi(gridID) + GetPhi(gridID + 1))/2.
+		       );
+  
+ l_cluster.setEnergy(0);
+  std::cout << "About to set the cluster position to " << l_vec.X() << '\t' << l_vec.Y() << '\t' << l_vec.Z() << std::endl;
+  std::cout << "Corresponding to theta " << l_vec.Theta() << " phi " << l_vec.Phi() << std::endl;
+  l_cluster.setPosition( {float(l_vec.X()),float(l_vec.Y()),float(l_vec.Z()) } );
+  std::cout << "pippo "<< l_cluster.getPosition().x << '\t' << l_cluster.getPosition().y << '\t' << l_cluster.getPosition().z << std::endl; */
+  
+}
+
+void DR_CaloGridHelper::Print()
+{
+  std::cout << "--------------------------------------------------------" << std::endl;
+  std::cout << "DR_CaloGridHelper current status:\n\n\n" << std::endl;
+  for (auto itr = m_caloGrid.begin(); itr != m_caloGrid.end(); ++itr){
+    std::cout << "ID " << itr->first << " Theta = " << GetTheta(itr->first) << " Phi = " << GetPhi(itr->first) << " E = " << itr->second << std::endl;
+  }
+  std::cout << "--------------------------------------------------------" << std::endl;
+}
+
+void DR_CaloGridHelper::Reset()
+{
+  m_caloGrid.clear();
+}
+
+void DR_CaloGridHelper::EventDisplay(TString filename)
+{
+  double minCosTheta = 1;
+  double maxCosTheta = -1;
+  double minPhi = 2*TMath::Pi();
+  double maxPhi = 0;
+
+  for (auto itr = m_caloGrid.begin(); itr != m_caloGrid.end(); ++itr){
+    if (GetCosTheta(itr->first) < minCosTheta) minCosTheta = GetCosTheta(itr->first);
+    if (GetCosTheta(itr->first) > maxCosTheta) maxCosTheta = GetCosTheta(itr->first);
+    if (GetPhi(itr->first) < minPhi) minPhi = GetPhi(itr->first);
+    if (GetPhi(itr->first) > maxPhi) maxPhi = GetPhi(itr->first);
+  }
+
+  minCosTheta -= m_delta;
+  maxCosTheta += m_delta;
+
+  minPhi -= m_delta;
+  maxPhi += m_delta;
+
+  int NbinsX = static_cast<int>((maxCosTheta - minCosTheta)/m_delta);
+  int NbinsY = static_cast<int>((maxPhi - minPhi)/m_delta);
+
+  TH2F h("h","",NbinsX,minCosTheta,maxCosTheta,NbinsY,minPhi,maxPhi);
+
+  for (auto itr = m_caloGrid.begin(); itr != m_caloGrid.end(); ++itr){
+    h.Fill(GetCosTheta(itr->first),GetPhi(itr->first),itr->second);
+  }
+
+  TCanvas c;
+  
+  h.Draw("COLZ");
+
+  c.Print(filename);
+}
+  
