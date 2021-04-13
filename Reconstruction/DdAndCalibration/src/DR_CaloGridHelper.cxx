@@ -59,13 +59,20 @@ double DR_CaloGridHelper::GetPhi(DR_GridID id)
   if (retval > 2*TMath::Pi() || retval < 0){
     std::cout << "WARNING: anomalous value of " << retval << " for phi, which should be between 0 and 2Pi" << std::endl;
   }
+  if (retval > TMath::Pi()) retval = retval - 2*TMath::Pi();
   return retval;
 }
 
 double DR_CaloGridHelper::GetEnergy(DR_GridID id)
 {
+
   if (m_caloGrid.find(id) == m_caloGrid.end()) return 0;
-  return m_caloGrid[id];
+  double retval;
+  retval = 0;  
+  for (const edm4hep::CalorimeterHit * hit : m_caloGrid[id]){
+    retval += hit->getEnergy();
+  }
+  return retval;
 }
 
 double DR_CaloGridHelper::GetEnergy(float theta, float phi)
@@ -73,7 +80,21 @@ double DR_CaloGridHelper::GetEnergy(float theta, float phi)
   return GetEnergy(GetID(theta,phi));
 }
 
-void DR_CaloGridHelper::Add(float theta, float phi, float energy)
+std::vector<DR_GridID> DR_CaloGridHelper::ListOfAdjacentCellID(DR_GridID l_ID)
+{
+  std::vector<DR_GridID> retval;
+  retval.clear();
+  retval.push_back(l_ID-1);
+  retval.push_back(l_ID+1);
+  retval.push_back(l_ID+m_spacing);
+  retval.push_back(l_ID+m_spacing+1);
+  retval.push_back(l_ID+m_spacing-1);
+  retval.push_back(l_ID-m_spacing+1);
+  retval.push_back(l_ID-m_spacing-11);
+  return retval;
+}
+
+/*void DR_CaloGridHelper::Add(float theta, float phi, float energy)
 {
   static DR_GridID id;
   id = GetID(theta,phi);
@@ -81,25 +102,29 @@ void DR_CaloGridHelper::Add(float theta, float phi, float energy)
     CreateEntry(id);
   }
   m_caloGrid[id] = energy + GetEnergy(id); // This now assumes that the individual elements of the grid should be massless. I believe this is the right thing to do (for example, it wouldn't make sense to sum the 4-vectors of the individual fiber, if the fibers arise from a single particle). In any case, the effect should be very small for small size of the grid elements
-}
+  }*/
 
-void DR_CaloGridHelper::Add(const edm4hep::CalorimeterHit & caloHit)
+void DR_CaloGridHelper::Add(const edm4hep::CalorimeterHit * caloHit)
 {
   static TVector3 l_hit;
   l_hit.SetXYZ(
-	       caloHit.getPosition().x,
-	       caloHit.getPosition().y,
-	       caloHit.getPosition().z
+	       caloHit->getPosition().x,
+	       caloHit->getPosition().y,
+	       caloHit->getPosition().z
 	       );
   
   static DR_GridID id;
-  Add(l_hit.Theta(),l_hit.Phi(),caloHit.getEnergy());
+  id = GetID(l_hit.Theta(),l_hit.Phi());
+  if (m_caloGrid.find(id) == m_caloGrid.end()) {
+    CreateEntry(id);
+  }
+  m_caloGrid[id].push_back(caloHit);
 }
 
 
 void DR_CaloGridHelper::CreateEntry(DR_GridID gridID)
 {
-  m_caloGrid[gridID] = 0;
+  m_caloGrid[gridID] = DR_CaloHitVec();
 
   /*m_caloGrid[gridID] = edm4hep::ClusterCollection();
   auto l_cluster = m_caloGrid[gridID].create();
@@ -125,7 +150,7 @@ void DR_CaloGridHelper::Print()
   std::cout << "--------------------------------------------------------" << std::endl;
   std::cout << "DR_CaloGridHelper current status:\n\n\n" << std::endl;
   for (auto itr = m_caloGrid.begin(); itr != m_caloGrid.end(); ++itr){
-    std::cout << "ID " << itr->first << " Theta = " << GetTheta(itr->first) << " Phi = " << GetPhi(itr->first) << " E = " << itr->second << std::endl;
+    std::cout << "ID " << itr->first << " Theta = " << GetTheta(itr->first) << " Phi = " << GetPhi(itr->first) << " E = " << GetEnergy(itr->first) << std::endl;
   }
   std::cout << "--------------------------------------------------------" << std::endl;
 }
@@ -135,25 +160,8 @@ void DR_CaloGridHelper::Reset()
   m_caloGrid.clear();
 }
 
-void DR_CaloGridHelper::EventDisplay(TString filename)
+void DR_CaloGridHelper::EventDisplay(TString filename, float minCosTheta, float maxCosTheta, float minPhi, float maxPhi)
 {
-  double minCosTheta = 1;
-  double maxCosTheta = -1;
-  double minPhi = 2*TMath::Pi();
-  double maxPhi = 0;
-
-  for (auto itr = m_caloGrid.begin(); itr != m_caloGrid.end(); ++itr){
-    if (GetCosTheta(itr->first) < minCosTheta) minCosTheta = GetCosTheta(itr->first);
-    if (GetCosTheta(itr->first) > maxCosTheta) maxCosTheta = GetCosTheta(itr->first);
-    if (GetPhi(itr->first) < minPhi) minPhi = GetPhi(itr->first);
-    if (GetPhi(itr->first) > maxPhi) maxPhi = GetPhi(itr->first);
-  }
-
-  minCosTheta -= m_delta;
-  maxCosTheta += m_delta;
-
-  minPhi -= m_delta;
-  maxPhi += m_delta;
 
   int NbinsX = static_cast<int>((maxCosTheta - minCosTheta)/m_delta);
   int NbinsY = static_cast<int>((maxPhi - minPhi)/m_delta);
@@ -161,7 +169,7 @@ void DR_CaloGridHelper::EventDisplay(TString filename)
   TH2F h("h","",NbinsX,minCosTheta,maxCosTheta,NbinsY,minPhi,maxPhi);
 
   for (auto itr = m_caloGrid.begin(); itr != m_caloGrid.end(); ++itr){
-    h.Fill(GetCosTheta(itr->first),GetPhi(itr->first),itr->second);
+    h.Fill(GetCosTheta(itr->first),GetPhi(itr->first),GetEnergy(itr->first));
   }
 
   TCanvas c;

@@ -17,7 +17,7 @@ int main(int argc, char **argv)
   }
 
   ClusterRecSteer l_steer;
-  l_steer.SetDebug();
+  l_steer.SetDebug(false);
   std::cout << "Loading input file " << std::endl;
   if (!l_steer.LoadFile(argv[1])) return -1;
   std::cout << "Starting process" << std::endl;

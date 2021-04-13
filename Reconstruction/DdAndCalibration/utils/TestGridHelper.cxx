@@ -16,10 +16,10 @@ int main()
   std::cout << "GetCosTheta(5000000) " << mygrid.GetCosTheta(5000000) << std::endl;
   std::cout << "GetTheta(5000000) " << mygrid.GetTheta(5000000) << std::endl;
   std::cout << "GetID(3.00836,0)" << mygrid.GetID(3.00836,0) << std::endl;
-  mygrid.Add(1.6,0,10000);
+  //mygrid.Add(1.6,0,10000);
   std::cout << "GetEnergy(0.1,0.1) " << mygrid.GetEnergy(0.1,0.1) << std::endl;
   std::cout << "GetEnergy(1.6,0)" << mygrid.GetEnergy(1.6,0) << std::endl;
-  mygrid.Add(1.6,0,10000);
+  //mygrid.Add(1.6,0,10000);
   std::cout << "GetEnergy(1.6,0)" << mygrid.GetEnergy(1.6,0) << std::endl;
   mygrid.Print();
   std::cout << "cazzo crasho" << std::endl;
@@ -32,19 +32,19 @@ int main()
   mycalo.setPosition({1000.,1000.,1000.});
   mycalo.setEnergy(5000);
   std::cout << "cazzo crasho 2.5" << std::endl;
-  mygrid.Add(mycalo);
+  mygrid.Add(&mycalo);
   std::cout << "cazzo crasho 3" << std::endl;
   edm4hep::CalorimeterHit mycalo1;
   mycalo1.setPosition({-1000.,1000.,300.});
-  mygrid.Add(mycalo1);
+  mygrid.Add(&mycalo1);
   std::cout << "cazzo crasho 4" << std::endl;
-    edm4hep::CalorimeterHit mycalo2;
+  edm4hep::CalorimeterHit mycalo2;
   mycalo2.setPosition({1000.,1000.,1000.});
-  mygrid.Add(mycalo2);
+  mygrid.Add(&mycalo2);
   std::cout << "cazzo crasho 5" << std::endl;
   edm4hep::CalorimeterHit mycalo3;
   mycalo3.setPosition({200.,100.,-200.});
-  mygrid.Add(mycalo3);
+  mygrid.Add(&mycalo3);
   mygrid.Print();
   return 0;
   

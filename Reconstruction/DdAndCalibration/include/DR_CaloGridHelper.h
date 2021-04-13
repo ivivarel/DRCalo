@@ -8,9 +8,11 @@
 #include <TH2F.h>
 
 #include <map>
+#include <vector>
 #include <memory>
 
-typedef   std::map<unsigned long long, double > DR_CaloGrid;
+typedef std::vector<const edm4hep::CalorimeterHit *> DR_CaloHitVec;
+typedef   std::map<unsigned long long, DR_CaloHitVec > DR_CaloGrid;
 typedef unsigned long long DR_GridID;
 
 class DR_CaloGridHelper
@@ -21,7 +23,7 @@ class DR_CaloGridHelper
   // at a distance of 2.5 m from the collision points.
 
  public: 
-  DR_CaloGridHelper(double distPar = 5.);
+  DR_CaloGridHelper(double distPar = 10.);
   ~DR_CaloGridHelper() {};
 
   double GetCosTheta(DR_GridID id);
@@ -30,14 +32,15 @@ class DR_CaloGridHelper
   DR_GridID GetID(float theta, float phi);
   double GetEnergy(DR_GridID id);
   double GetEnergy(float theta, float phi);
+  std::vector<DR_GridID> ListOfAdjacentCellID(DR_GridID);
   void SetDistanceParameter(double dp) {m_rm = dp;};
   void CreateGrid();
   double GetDelta() {return m_delta;}
-  void Add(float theta, float phi, float energy);
-  void Add(const edm4hep::CalorimeterHit & caloHit); 
+  //  void Add(float theta, float phi, float energy);
+  void Add(const edm4hep::CalorimeterHit * caloHit); 
   void Reset();
   DR_CaloGrid &  GetGrid() {return m_caloGrid;}
-  void EventDisplay(TString filename);
+  void EventDisplay(TString filename, float minCosTheta, float maxCosTheta, float minPhi, float maxPhi);
   void Print();
  
   

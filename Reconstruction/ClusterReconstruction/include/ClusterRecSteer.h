@@ -11,6 +11,8 @@
 
 #include "DR_CaloGridHelper.h"
 
+#include "ClusterRecAlgorithms.h"
+
 /*** 
 
 The idea of this piece of code is to be the driver of the reconstruction of clusters starting from CalorimeterHit collections. The input to it is pointers to hit collections. The output is a list of clusters. An option should be available to make the intermediate grid also available in some form
@@ -38,6 +40,7 @@ class ClusterRecSteer
   podio::ROOTReader m_reader;
   podio::EventStore m_read_store;
   DR_CaloGridHelper m_grid;
+  ClusterRecAlgorithms m_algorithms;
 };
 
 #endif

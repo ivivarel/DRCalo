@@ -5,6 +5,7 @@
 #include "edm4hep/CalorimeterHitCollection.h"
 #include "edm4hep/ClusterCollection.h"
 
+
 #include "podio/ROOTWriter.h"
 
 #include <iostream>
@@ -17,14 +18,14 @@ bool ClusterRecSteer::Process()
   
   unsigned int nevents = m_reader.getEntries();
   
-  //    edm4hep::CalorimeterHitCollection s_recoCaloHits;
+  edm4hep::ClusterCollection clusColl;
 
   m_grid.CreateGrid();
   
   // main loop over events
   
-  //  for (unsigned int i_evt = 0; i_evt < nevents; ++i_evt){
-  for (unsigned int i_evt = 0; i_evt < 2; ++i_evt){
+  for (unsigned int i_evt = 0; i_evt < nevents; ++i_evt){
+    //for (unsigned int i_evt = 0; i_evt < 10; ++i_evt){
 
     // reset the grid
     m_grid.Reset();
@@ -53,19 +54,23 @@ bool ClusterRecSteer::Process()
     
     // Now create the CalorimeterHitCollection and pass them to a (dummy) digitization step that will fill them.
     
-    std::cout << "Energy of the first hit = " << s_hitColl[0].getEnergy() << std::endl;
-
-    // prepare the grid
-
-    for (auto & hit : s_hitColl){
-      m_grid.Add(hit);
-    }
-
-    TString filename = "evt_display_";
-    filename += i_evt;
-    filename += ".pdf";
-    m_grid.EventDisplay(filename);
+    if (m_debug) std::cout << "Energy of the first hit = " << s_hitColl[0].getEnergy() << std::endl;
     
+    // prepare the grid
+    
+    for (auto & hit : s_hitColl){
+      m_grid.Add(&hit);
+    }
+    
+    m_algorithms.DoDebug(m_debug);
+    m_algorithms.PreClustering(&clusColl, &m_grid);
+    
+    
+    /*TString filename = "evt_display_";
+      filename += i_evt;
+      filename += ".pdf";
+    m_grid.EventDisplay(filename, -0.2, 0.2, -0.1,0.3);
+    */
     
     // Final cleanup
 

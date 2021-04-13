@@ -1,6 +1,19 @@
 from EventStore import EventStore
 import ROOT
 
+def getCosTheta(x,y,z):
+    return ROOT.TMath.Cos(getTheta(x,y,z))
+
+def getPhi(x,y,z):
+    v = ROOT.TVector3()
+    v.SetXYZ(x,y,z)
+    return v.Phi()
+
+def getTheta(x,y,z):
+    v = ROOT.TVector3()
+    v.SetXYZ(x,y,z)
+    return v.Theta()
+
 def main():
     import argparse
 
@@ -63,6 +76,16 @@ def main():
     h_n_c_fiber.SetXTitle("C fibre multiplicity")
     h_list.append(h_n_c_fiber)
 
+    h_pos_s = ROOT.TH2F("h_pos_s","",20,-1,1,64,-3.2,3.2)
+    h_pos_s.SetXTitle("cos #theta")
+    h_pos_s.SetYTitle("#phi")
+    h_list.append(h_pos_s)
+
+    h_pos_c = ROOT.TH2F("h_pos_c","",20,-1,1,64,-3.2,3.2)
+    h_pos_c.SetXTitle("cos #theta")
+    h_pos_c.SetYTitle("#phi")
+    h_list.append(h_pos_c)
+    
         
     c = ROOT.TCanvas()
 
@@ -94,12 +117,24 @@ def main():
             tot_c_energy = tot_c_energy + hit.getEnergy()
             tot_c_time = tot_c_time + hit.getTime()
             n_c_fiber = n_c_fiber + 1
+            h_pos_c.Fill(getCosTheta(hit.getPosition().x,
+                                     hit.getPosition().y,
+                                     hit.getPosition().z),
+                         getPhi(hit.getPosition().x,
+                                hit.getPosition().y,
+                                hit.getPosition().z))   
         for hit in s_hits:
             h_s_fiber_energy.Fill(hit.getEnergy())
             h_s_fiber_time.Fill(hit.getTime())
             tot_s_energy = tot_s_energy + hit.getEnergy()
             tot_s_time = tot_s_time + hit.getTime()
             n_s_fiber = n_s_fiber + 1
+            h_pos_s.Fill(getCosTheta(hit.getPosition().x,
+                                     hit.getPosition().y,
+                                     hit.getPosition().z),
+                         getPhi(hit.getPosition().x,
+                                hit.getPosition().y,
+                                hit.getPosition().z))   
         
         if (n_s_fiber != 0):
             tot_s_time = tot_s_time/n_s_fiber
