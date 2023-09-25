@@ -13,20 +13,21 @@
 bool ClusterRecSteer::Process()
 {
   
-  //  podio::EventStore l_store;                                                                                 
-  //  podio::ROOTWriter l_writer("output.root",&l_store);
+  podio::EventStore l_store;                                                                                 
+  podio::ROOTWriter l_writer(m_outputFileName,&l_store);
   
   unsigned int nevents = m_reader.getEntries();
   
-  edm4hep::ClusterCollection clusColl;
+  edm4hep::ClusterCollection & clusColl = l_store.create<edm4hep::ClusterCollection>(m_clusterCollectionName);
+  l_writer.registerForWrite(m_clusterCollectionName);
 
   m_grid.CreateGrid();
   
   // main loop over events
   
-  for (unsigned int i_evt = 0; i_evt < nevents; ++i_evt){
-    //for (unsigned int i_evt = 0; i_evt < 10; ++i_evt){
-
+  //for (unsigned int i_evt = 0; i_evt < nevents; ++i_evt){
+  for (unsigned int i_evt = 0; i_evt < 10; ++i_evt){
+    if (i_evt%500 == 0) std::cout << i_evt << " events processed" << std::endl;    
     // reset the grid
     m_grid.Reset();
     
@@ -58,35 +59,36 @@ bool ClusterRecSteer::Process()
     
     // prepare the grid
     
-    for (auto & hit : s_hitColl){
+    for (auto hit : s_hitColl){
       m_grid.Add(&hit);
     }
     
     m_algorithms.DoDebug(m_debug);
-    m_algorithms.PreClustering(&clusColl, &m_grid);
+    m_algorithms.PreClustering(clusColl, &m_grid);
     
-    
-    /*TString filename = "evt_display_";
-      filename += i_evt;
-      filename += ".pdf";
+    TString filename = "evt_display_";
+    filename += i_evt;
+    filename += ".pdf";
     m_grid.EventDisplay(filename, -0.2, 0.2, -0.1,0.3);
-    */
+    
     
     // Final cleanup
-
-   
-   
+    
+    
+    l_writer.writeEvent();
     m_read_store.clear();
     m_reader.endOfEvent();
-    //l_store.clearCollections();
+    l_store.clearCollections();
   }
-  //l_writer.finish();
+  l_writer.finish();
   return true;
 }
 
 ClusterRecSteer::ClusterRecSteer():
+  m_outputFileName("output_reco.root"),
   m_inputCherHitsName("C_CalorimeterHits"),
   m_inputScintHitsName("S_CalorimeterHits"),
+  m_clusterCollectionName("DR_Clusters"),
   m_debug(false)
 {
 }

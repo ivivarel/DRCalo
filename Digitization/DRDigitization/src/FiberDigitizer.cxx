@@ -27,7 +27,7 @@ void FiberDigitizer::Digitize(const edm4hep::SimCalorimeterHitCollection& i_coll
   
   // This is indeed a loop over fibres for one event
   
-  for (auto& sim_hit : i_coll){
+  for (auto sim_hit : i_coll){
     
     if (m_debug) std::cout << "Starting the loop on the hit collections" << std::endl;
     

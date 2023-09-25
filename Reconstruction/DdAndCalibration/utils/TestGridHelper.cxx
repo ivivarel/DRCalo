@@ -32,19 +32,23 @@ int main()
   mycalo.setPosition({1000.,1000.,1000.});
   mycalo.setEnergy(5000);
   std::cout << "cazzo crasho 2.5" << std::endl;
-  mygrid.Add(&mycalo);
+  edm4hep::ConstCalorimeterHit const_mycalo = mycalo;
+  mygrid.Add(&const_mycalo);
   std::cout << "cazzo crasho 3" << std::endl;
   edm4hep::CalorimeterHit mycalo1;
   mycalo1.setPosition({-1000.,1000.,300.});
-  mygrid.Add(&mycalo1);
+  edm4hep::ConstCalorimeterHit const_mycalo1 = mycalo1;
+  mygrid.Add(&const_mycalo1);
   std::cout << "cazzo crasho 4" << std::endl;
   edm4hep::CalorimeterHit mycalo2;
   mycalo2.setPosition({1000.,1000.,1000.});
-  mygrid.Add(&mycalo2);
+  edm4hep::ConstCalorimeterHit const_mycalo2 = mycalo2;
+  mygrid.Add(&const_mycalo2);
   std::cout << "cazzo crasho 5" << std::endl;
   edm4hep::CalorimeterHit mycalo3;
   mycalo3.setPosition({200.,100.,-200.});
-  mygrid.Add(&mycalo3);
+  edm4hep::ConstCalorimeterHit const_mycalo3 = mycalo3;
+  mygrid.Add(&const_mycalo3);
   mygrid.Print();
   return 0;
   

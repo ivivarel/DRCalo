@@ -11,7 +11,7 @@
 #include <vector>
 #include <memory>
 
-typedef std::vector<const edm4hep::CalorimeterHit *> DR_CaloHitVec;
+typedef std::vector<edm4hep::ConstCalorimeterHit *> DR_CaloHitVec;
 typedef   std::map<unsigned long long, DR_CaloHitVec > DR_CaloGrid;
 typedef unsigned long long DR_GridID;
 
@@ -37,7 +37,7 @@ class DR_CaloGridHelper
   void CreateGrid();
   double GetDelta() {return m_delta;}
   //  void Add(float theta, float phi, float energy);
-  void Add(const edm4hep::CalorimeterHit * caloHit); 
+  void Add(edm4hep::ConstCalorimeterHit * caloHit); 
   void Reset();
   DR_CaloGrid &  GetGrid() {return m_caloGrid;}
   void EventDisplay(TString filename, float minCosTheta, float maxCosTheta, float minPhi, float maxPhi);
@@ -51,6 +51,7 @@ class DR_CaloGridHelper
   double m_delta;
   unsigned int m_spacing; // Parameter used to encode eta and phi in the ID
   void CreateEntry(DR_GridID gridID);
+  DR_GridID m_maxBinPhi; //take into account the cut in phi
 };
 
 #endif // ifndef DR_CALOGRIDHELPER_H   

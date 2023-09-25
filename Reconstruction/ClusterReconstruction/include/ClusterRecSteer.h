@@ -28,14 +28,18 @@ class ClusterRecSteer
   bool Process();
   bool LoadFile(std::string input_file_name);
   bool CloseFile();
+  void SetOutputFileName(std::string output_file_name) {m_outputFileName = output_file_name;}
+  void SetClusterCollectionName(std::string cluster_name) {m_clusterCollectionName = cluster_name;}
   void SetScintInputHitsName(std::string input_hits_name="S_CalorimeterHits") {m_inputScintHitsName=input_hits_name;}
   void SetCherInputHitsName(std::string input_hits_name="C_CalorimeterHits") {m_inputCherHitsName=input_hits_name;}
   void SetDebug(bool debug = true) {m_debug = debug;}
   void SetGridSpacing(double spacing) {m_grid.SetDistanceParameter(spacing);}
   
  private:
+  std::string m_outputFileName;
   std::string m_inputCherHitsName;
   std::string m_inputScintHitsName;
+  std::string m_clusterCollectionName;
   bool m_debug;
   podio::ROOTReader m_reader;
   podio::EventStore m_read_store;

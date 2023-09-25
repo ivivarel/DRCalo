@@ -7,13 +7,14 @@
 #include <iostream>
 
 DR_CaloGridHelper::DR_CaloGridHelper(double distPar):
-  m_rm(distPar), m_caloEffDist(2500.),m_delta(0), m_spacing(1000000)
+  m_rm(distPar), m_caloEffDist(2500.),m_delta(0), m_spacing(1000000),m_maxBinPhi(0)
 {
 }
 
 void DR_CaloGridHelper::CreateGrid()
 {
   m_delta = TMath::Sqrt(TMath::Pi()) * m_rm/m_caloEffDist; // This follows from requiring the area of a circle of radius m_rm being equal to the element of area m_caloEffDist^2 * d cos theta * dphi and setting both d cos theta and dphi equal to m_delta
+  m_maxBinPhi = static_cast<DR_GridID>(2*TMath::Pi()/m_delta);
   std::cout << m_delta << std::endl;
 }
 
@@ -45,7 +46,7 @@ DR_GridID DR_CaloGridHelper::GetID(float theta, float phi) // Theta and Phi both
 
 double DR_CaloGridHelper::GetCosTheta(DR_GridID id)
 {
-  return static_cast<double>((id/m_spacing))*m_delta -1;
+  return static_cast<double>((id/m_spacing)*m_delta) -1;
 }
 
 double DR_CaloGridHelper::GetTheta(DR_GridID id)
@@ -69,7 +70,7 @@ double DR_CaloGridHelper::GetEnergy(DR_GridID id)
   if (m_caloGrid.find(id) == m_caloGrid.end()) return 0;
   double retval;
   retval = 0;  
-  for (const edm4hep::CalorimeterHit * hit : m_caloGrid[id]){
+  for (edm4hep::ConstCalorimeterHit * hit : m_caloGrid[id]){
     retval += hit->getEnergy();
   }
   return retval;
@@ -84,13 +85,33 @@ std::vector<DR_GridID> DR_CaloGridHelper::ListOfAdjacentCellID(DR_GridID l_ID)
 {
   std::vector<DR_GridID> retval;
   retval.clear();
-  retval.push_back(l_ID-1);
-  retval.push_back(l_ID+1);
-  retval.push_back(l_ID+m_spacing);
-  retval.push_back(l_ID+m_spacing+1);
-  retval.push_back(l_ID+m_spacing-1);
-  retval.push_back(l_ID-m_spacing+1);
-  retval.push_back(l_ID-m_spacing-11);
+  // For phi need to pay attention at the cut
+  DR_GridID cosThetaBin,phiBin;
+  cosThetaBin = l_ID/m_spacing;
+  phiBin = l_ID%m_spacing;
+  DR_GridID nextPhi, previousPhi;
+  nextPhi = 0;
+  previousPhi = phiBin - 1;
+  
+  if (phiBin >= m_maxBinPhi) {
+    nextPhi = 0; // Crossed max bin in phi, restart counting from 0
+    if (phiBin > m_maxBinPhi) std::cout << "WTF????????????" << std::endl;
+  } else {
+    nextPhi = phiBin + 1;
+  }
+  if (phiBin == 0) previousPhi = m_maxBinPhi;
+  else previousPhi = phiBin - 1;
+  
+ 
+  retval.push_back((cosThetaBin * m_spacing) + nextPhi);
+  retval.push_back((cosThetaBin * m_spacing) + previousPhi);
+  retval.push_back(((cosThetaBin+1) * m_spacing) + phiBin);
+  retval.push_back(((cosThetaBin+1) * m_spacing) + nextPhi);
+  retval.push_back(((cosThetaBin+1) * m_spacing) + previousPhi);
+  retval.push_back(((cosThetaBin-1) * m_spacing) + phiBin);
+  retval.push_back(((cosThetaBin-1) * m_spacing) + nextPhi);
+  retval.push_back(((cosThetaBin-1) * m_spacing) + previousPhi);
+
   return retval;
 }
 
@@ -104,7 +125,7 @@ std::vector<DR_GridID> DR_CaloGridHelper::ListOfAdjacentCellID(DR_GridID l_ID)
   m_caloGrid[id] = energy + GetEnergy(id); // This now assumes that the individual elements of the grid should be massless. I believe this is the right thing to do (for example, it wouldn't make sense to sum the 4-vectors of the individual fiber, if the fibers arise from a single particle). In any case, the effect should be very small for small size of the grid elements
   }*/
 
-void DR_CaloGridHelper::Add(const edm4hep::CalorimeterHit * caloHit)
+void DR_CaloGridHelper::Add(edm4hep::ConstCalorimeterHit * caloHit)
 {
   static TVector3 l_hit;
   l_hit.SetXYZ(
